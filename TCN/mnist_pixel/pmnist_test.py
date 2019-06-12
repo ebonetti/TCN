@@ -28,6 +28,8 @@ parser.add_argument('--log-interval', type=int, default=100, metavar='N',
                     help='report interval (default: 100')
 parser.add_argument('--lr', type=float, default=2e-3,
                     help='initial learning rate (default: 2e-3)')
+parser.add_argument('--decay', default=1e-4, type=float,
+                    help='weight decay (default=1e-4)')
 parser.add_argument('--optim', type=str, default='Adam',
                     help='optimizer to use (default: Adam)')
 parser.add_argument('--nhid', type=int, default=25,
@@ -66,7 +68,7 @@ if args.cuda:
     permute = permute.cuda()
 
 lr = args.lr
-optimizer = getattr(optim, args.optim)(model.parameters(), lr=lr)
+optimizer = getattr(optim, args.optim)(model.parameters(), lr=lr, weight_decay=args.decay)
 
 
 def train(ep):

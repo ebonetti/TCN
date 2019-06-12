@@ -69,7 +69,7 @@ if args.cuda:
     Y_test = Y_test.cuda()
 
 lr = args.lr
-optimizer = getattr(optim, args.optim)(model.parameters(), lr=lr)
+optimizer = getattr(optim, args.optim)(model.parameters(), lr=lr, weight_decay=args.decay)
 
 
 def train(epoch):

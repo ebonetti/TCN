@@ -36,6 +36,8 @@ parser.add_argument('--log-interval', type=int, default=50, metavar='N',
                     help='report interval (default: 50')
 parser.add_argument('--lr', type=float, default=5e-4,
                     help='initial learning rate (default: 5e-4)')
+parser.add_argument('--decay', default=1e-4, type=float,
+                    help='weight decay (default=1e-4)')
 parser.add_argument('--optim', type=str, default='RMSprop',
                     help='optimizer to use (default: RMSprop)')
 parser.add_argument('--nhid', type=int, default=10,
@@ -82,7 +84,7 @@ if args.cuda:
 
 criterion = nn.CrossEntropyLoss()
 lr = args.lr
-optimizer = getattr(optim, args.optim)(model.parameters(), lr=lr)
+optimizer = getattr(optim, args.optim)(model.parameters(), lr=lr, weight_decay=args.decay)
 
 
 def evaluate():
