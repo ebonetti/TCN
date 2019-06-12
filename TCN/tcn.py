@@ -16,6 +16,7 @@ class TemporalBlock(nn.Module):
     def __init__(self, n_inputs, n_outputs, kernel_size, stride, dilation, padding, no_weight_norm, dropout=0.2):
         super(TemporalBlock, self).__init__()
         
+        weight_norm = weight_norm
         if no_weight_norm:
             weight_norm = lambda x: x
 
