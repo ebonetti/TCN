@@ -75,7 +75,7 @@ emb_dropout = args.emb_dropout
 tied = args.tied
 
 model = TCN(args.emsize, n_words, num_chans, dropout=dropout, 
-            emb_dropout=emb_dropout, kernel_size=k_size, tied_weights=tied, no_weight_norm = not weight_norm)
+            emb_dropout=emb_dropout, kernel_size=k_size, tied_weights=tied, no_weight_norm = not args.weight_norm)
 
 if args.cuda:
     model.cuda()

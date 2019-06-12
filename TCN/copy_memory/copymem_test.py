@@ -71,7 +71,7 @@ test_x, test_y = data_generator(T, seq_len, n_test)
 channel_sizes = [args.nhid] * args.levels
 kernel_size = args.ksize
 dropout = args.dropout
-model = TCN(1, n_classes, channel_sizes, kernel_size, dropout=dropout, no_weight_norm = not weight_norm)
+model = TCN(1, n_classes, channel_sizes, kernel_size, dropout=dropout, no_weight_norm = not args.weight_norm)
 
 if args.cuda:
     model.cuda()

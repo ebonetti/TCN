@@ -73,7 +73,7 @@ num_chans = [args.nhid] * (args.levels - 1) + [args.emsize]
 k_size = args.ksize
 dropout = args.dropout
 emb_dropout = args.emb_dropout
-model = TCN(args.emsize, n_characters, num_chans, kernel_size=k_size, dropout=dropout, emb_dropout=emb_dropout, no_weight_norm = not weight_norm)
+model = TCN(args.emsize, n_characters, num_chans, kernel_size=k_size, dropout=dropout, emb_dropout=emb_dropout, no_weight_norm = not args.weight_norm)
 
 
 if args.cuda:

@@ -54,7 +54,7 @@ n_channels = [args.nhid] * args.levels
 kernel_size = args.ksize
 dropout = args.dropout
 
-model = TCN(input_size, input_size, n_channels, kernel_size, dropout=args.dropout, no_weight_norm = not weight_norm)
+model = TCN(input_size, input_size, n_channels, kernel_size, dropout=args.dropout, no_weight_norm = not args.weight_norm)
 
 
 if args.cuda:
