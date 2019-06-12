@@ -42,6 +42,8 @@ parser.add_argument('--nhid', type=int, default=10,
                     help='number of hidden units per layer (default: 10)')
 parser.add_argument('--seed', type=int, default=1111,
                     help='random seed (default: 1111)')
+parser.add_argument('--weight_norm', action='store_false',
+                    help='use weight_norm (default: True)')
 args = parser.parse_args()
 
 torch.manual_seed(args.seed)
@@ -69,7 +71,7 @@ test_x, test_y = data_generator(T, seq_len, n_test)
 channel_sizes = [args.nhid] * args.levels
 kernel_size = args.ksize
 dropout = args.dropout
-model = TCN(1, n_classes, channel_sizes, kernel_size, dropout=dropout)
+model = TCN(1, n_classes, channel_sizes, kernel_size, dropout=dropout, no_weight_norm = not weight_norm)
 
 if args.cuda:
     model.cuda()

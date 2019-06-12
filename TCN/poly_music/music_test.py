@@ -35,6 +35,8 @@ parser.add_argument('--data', type=str, default='Nott',
                     help='the dataset to run (default: Nott)')
 parser.add_argument('--seed', type=int, default=1111,
                     help='random seed (default: 1111)')
+parser.add_argument('--weight_norm', action='store_false',
+                    help='use weight_norm (default: True)')
 
 args = parser.parse_args()
 
@@ -52,7 +54,7 @@ n_channels = [args.nhid] * args.levels
 kernel_size = args.ksize
 dropout = args.dropout
 
-model = TCN(input_size, input_size, n_channels, kernel_size, dropout=args.dropout)
+model = TCN(input_size, input_size, n_channels, kernel_size, dropout=args.dropout, no_weight_norm = not weight_norm)
 
 
 if args.cuda:

@@ -8,10 +8,11 @@ from TCN.tcn import TemporalConvNet
 class TCN(nn.Module):
 
     def __init__(self, input_size, output_size, num_channels,
-                 kernel_size=2, dropout=0.3, emb_dropout=0.1, tied_weights=False):
+                 kernel_size=2, dropout=0.3, emb_dropout=0.1,
+                 tied_weights=False, no_weight_norm):
         super(TCN, self).__init__()
         self.encoder = nn.Embedding(output_size, input_size)
-        self.tcn = TemporalConvNet(input_size, num_channels, kernel_size, dropout=dropout)
+        self.tcn = TemporalConvNet(input_size, num_channels, kernel_size, dropout=dropout, no_weight_norm=no_weight_norm)
 
         self.decoder = nn.Linear(num_channels[-1], output_size)
         if tied_weights:

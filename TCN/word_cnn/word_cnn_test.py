@@ -53,6 +53,8 @@ parser.add_argument('--seq_len', type=int, default=80,
                     help='total sequence length, including effective history (default: 80)')
 parser.add_argument('--corpus', action='store_true',
                     help='force re-make the corpus (default: False)')
+parser.add_argument('--weight_norm', action='store_false',
+                    help='use weight_norm (default: True)')
 args = parser.parse_args()
 
 # Set the random seed manually for reproducibility.
@@ -76,7 +78,7 @@ k_size = args.ksize
 dropout = args.dropout
 emb_dropout = args.emb_dropout
 tied = args.tied
-model = TCN(args.emsize, n_words, num_chans, dropout=dropout, emb_dropout=emb_dropout, kernel_size=k_size, tied_weights=tied)
+model = TCN(args.emsize, n_words, num_chans, dropout=dropout, emb_dropout=emb_dropout, kernel_size=k_size, tied_weights=tied, no_weight_norm = not weight_norm)
 
 if args.cuda:
     model.cuda()
