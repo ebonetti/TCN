@@ -37,8 +37,8 @@ parser.add_argument('--log-interval', type=int, default=100, metavar='N',
                     help='report interval (default: 100)')
 parser.add_argument('--lr', type=float, default=4,
                     help='initial learning rate (default: 4)')
-parser.add_argument('--decay', default=1e-4, type=float,
-                    help='weight decay (default=1e-4)')
+parser.add_argument('--decay', default=0, type=float,
+                    help='weight decay (default=0)')
 parser.add_argument('--nhid', type=int, default=500,
                     help='number of hidden units per layer (default: 500)')
 parser.add_argument('--seed', type=int, default=1111,
