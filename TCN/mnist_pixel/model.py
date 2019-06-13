@@ -4,9 +4,9 @@ from TCN.tcn import TemporalConvNet
 
 
 class TCN(nn.Module):
-    def __init__(self, input_size, output_size, num_channels, kernel_size, dropout, no_weight_norm):
+    def __init__(self, input_size, output_size, num_channels, kernel_size, dropout, no_weight_norm, use_fixup_init):
         super(TCN, self).__init__()
-        self.tcn = TemporalConvNet(input_size, num_channels, kernel_size=kernel_size, dropout=dropout, no_weight_norm=no_weight_norm)
+        self.tcn = TemporalConvNet(input_size, num_channels, kernel_size=kernel_size, dropout=dropout, no_weight_norm=no_weight_norm, use_fixup_init=use_fixup_init)
         self.linear = nn.Linear(num_channels[-1], output_size)
 
     def forward(self, inputs):
