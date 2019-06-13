@@ -48,10 +48,10 @@ class TemporalBlock(nn.Module):
 
     def init_weights(self):
         if self.use_fixup_init:
-            self.conv1.weight.data.normal_(0, (2 / (self.conv1.kernel_size * self.conv1.out_channels * self.num_levels)) ** 0.5)
+            self.conv1.weight.data.normal_(0, (2.0 / (self.conv1.kernel_size[0] * self.conv1.out_channels * self.num_levels)) ** 0.5)
             self.conv2.weight.data.zero_()
             if self.downsample is not None:
-                self.downsample.weight.data.normal_(0, (2 / (self.downsample.kernel_size * self.downsample.out_channels)) ** 0.5)
+                self.downsample.weight.data.normal_(0, (2.0 / (self.downsample.kernel_size[0] * self.downsample.out_channels)) ** 0.5)
         else:
             self.conv1.weight.data.normal_(0, 0.01)
             self.conv2.weight.data.normal_(0, 0.01)
