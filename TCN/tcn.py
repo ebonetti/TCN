@@ -45,7 +45,7 @@ class TemporalBlock(nn.Module):
         self.init_weights()
 
     def init_weights(self):
-        print(conv1.weight.shape)
+        print(self.conv1.weight.shape)
         if self.use_fixup_init:
             self.conv1.weight.data.normal_(0, (2 / (self.conv1.weight.shape[1] * self.conv1.weight.shape[2] * self.num_levels)) ** 0.5)
             self.conv2.weight.data.zero_()
