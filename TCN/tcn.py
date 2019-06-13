@@ -12,8 +12,10 @@ class Chomp1d(nn.Module):
 
 
 class TemporalBlock(nn.Module):
-    def __init__(self, n_inputs, n_outputs, kernel_size, stride, dilation, padding, no_weight_norm, dropout=0.2):
+    def __init__(self, n_inputs, n_outputs, kernel_size, stride, dilation, padding, no_weight_norm, use_fixup_init, num_levels, dropout=0.2):
         super(TemporalBlock, self).__init__()
+        self.use_fixup_init = use_fixup_init
+        self.num_levels = num_levels
 
         weight_norm = torch.nn.utils.weight_norm
         if no_weight_norm:
@@ -43,10 +45,17 @@ class TemporalBlock(nn.Module):
         self.init_weights()
 
     def init_weights(self):
-        self.conv1.weight.data.normal_(0, 0.01)
-        self.conv2.weight.data.normal_(0, 0.01)
-        if self.downsample is not None:
-            self.downsample.weight.data.normal_(0, 0.01)
+        print(conv1.weight.shape)
+        if self.use_fixup_init:
+            self.conv1.weight.data.normal_(0, (2 / (self.conv1.weight.shape[1] * self.conv1.weight.shape[2] * self.num_levels)) ** 0.5)
+            self.conv2.weight.data.zero_()
+            if self.downsample is not None:
+                self.downsample.weight.data.normal_(0, (2 / (self.downsample.weight.shape[1] * self.downsample.weight.shape[2])) ** 0.5)
+        else:
+            self.conv1.weight.data.normal_(0, 0.01)
+            self.conv2.weight.data.normal_(0, 0.01)
+            if self.downsample is not None:
+                self.downsample.weight.data.normal_(0, 0.01)
 
     def forward(self, x):
         out = self.subnet1(x + self.bias1)
@@ -58,7 +67,7 @@ class TemporalBlock(nn.Module):
         return self.relu(out + res)
 
 class TemporalConvNet(nn.Module):
-    def __init__(self, num_inputs, num_channels, no_weight_norm, kernel_size=2, dropout=0.2):
+    def __init__(self, num_inputs, num_channels, no_weight_norm, use_fixup_init, kernel_size=2, dropout=0.2):
         super(TemporalConvNet, self).__init__()
         layers = []
         num_levels = len(num_channels)
@@ -67,7 +76,8 @@ class TemporalConvNet(nn.Module):
             in_channels = num_inputs if i == 0 else num_channels[i-1]
             out_channels = num_channels[i]
             layers += [TemporalBlock(in_channels, out_channels, kernel_size, stride=1, dilation=dilation_size,
-                                     padding=(kernel_size-1) * dilation_size, dropout=dropout, no_weight_norm=no_weight_norm)]
+                                     padding=(kernel_size-1) * dilation_size, dropout=dropout,
+                                     no_weight_norm=no_weight_norm, use_fixup_init=use_fixup_init, num_levels=num_levels)]
 
         self.network = nn.Sequential(*layers)
 

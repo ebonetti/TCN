@@ -52,6 +52,8 @@ parser.add_argument('--dataset', type=str, default='ptb',
                     help='dataset to use (default: ptb)')
 parser.add_argument('--weight_norm', action='store_false',
                     help='use weight_norm (default: True)')
+parser.add_argument('--use_fixup_init', action='store_true',
+                    help='use fixup for initializing weights (default: False)')
 args = parser.parse_args()
 
 # Set the random seed manually for reproducibility.
@@ -75,7 +77,7 @@ num_chans = [args.nhid] * (args.levels - 1) + [args.emsize]
 k_size = args.ksize
 dropout = args.dropout
 emb_dropout = args.emb_dropout
-model = TCN(args.emsize, n_characters, num_chans, kernel_size=k_size, dropout=dropout, emb_dropout=emb_dropout, no_weight_norm = not args.weight_norm)
+model = TCN(args.emsize, n_characters, num_chans, kernel_size=k_size, dropout=dropout, emb_dropout=emb_dropout, no_weight_norm = not args.weight_norm, use_fixup_init = args.use_fixup_init)
 
 
 if args.cuda:

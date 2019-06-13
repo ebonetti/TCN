@@ -39,7 +39,7 @@ parser.add_argument('--log-interval', type=int, default=100, metavar='N',
                     help='report interval (default: 100)')
 parser.add_argument('--lr', type=float, default=4,
                     help='initial learning rate (default: 4)')
-parser.add_argument('--decay', default=0, type=float,
+parser.add_argument('--decay', default=1e-4, type=float,
                     help='weight decay (default=0)')
 parser.add_argument('--nhid', type=int, default=600,
                     help='number of hidden units per layer (default: 600)')
@@ -57,6 +57,8 @@ parser.add_argument('--corpus', action='store_true',
                     help='force re-make the corpus (default: False)')
 parser.add_argument('--weight_norm', action='store_false',
                     help='use weight_norm (default: True)')
+parser.add_argument('--use_fixup_init', action='store_true',
+                    help='use fixup for initializing weights (default: False)')
 args = parser.parse_args()
 
 # Set the random seed manually for reproducibility.
@@ -80,7 +82,7 @@ k_size = args.ksize
 dropout = args.dropout
 emb_dropout = args.emb_dropout
 tied = args.tied
-model = TCN(args.emsize, n_words, num_chans, dropout=dropout, emb_dropout=emb_dropout, kernel_size=k_size, tied_weights=tied, no_weight_norm = not args.weight_norm)
+model = TCN(args.emsize, n_words, num_chans, dropout=dropout, emb_dropout=emb_dropout, kernel_size=k_size, tied_weights=tied, no_weight_norm = not args.weight_norm, use_fixup_init = args.use_fixup_init)
 
 if args.cuda:
     model.cuda()

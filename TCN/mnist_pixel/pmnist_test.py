@@ -40,6 +40,8 @@ parser.add_argument('--permute', action='store_true',
                     help='use permuted MNIST (default: false)')
 parser.add_argument('--weight_norm', action='store_false',
                     help='use weight_norm (default: True)')
+parser.add_argument('--use_fixup_init', action='store_true',
+                    help='use fixup for initializing weights (default: False)')
 args = parser.parse_args()
 
 torch.manual_seed(args.seed)
@@ -61,7 +63,7 @@ train_loader, test_loader = data_generator(root, batch_size)
 permute = torch.Tensor(np.random.permutation(784).astype(np.float64)).long()
 channel_sizes = [args.nhid] * args.levels
 kernel_size = args.ksize
-model = TCN(input_channels, n_classes, channel_sizes, kernel_size=kernel_size, dropout=args.dropout, no_weight_norm = not args.weight_norm)
+model = TCN(input_channels, n_classes, channel_sizes, kernel_size=kernel_size, dropout=args.dropout, no_weight_norm = not args.weight_norm, use_fixup_init = args.use_fixup_init)
 
 if args.cuda:
     model.cuda()

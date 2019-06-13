@@ -38,6 +38,8 @@ parser.add_argument('--seed', type=int, default=1111,
                     help='random seed (default: 1111)')
 parser.add_argument('--weight_norm', action='store_false',
                     help='use weight_norm (default: True)')
+parser.add_argument('--use_fixup_init', action='store_true',
+                    help='use fixup for initializing weights (default: False)')
 args = parser.parse_args()
 
 torch.manual_seed(args.seed)
@@ -61,7 +63,7 @@ X_test, Y_test = data_generator(1000, seq_length)
 channel_sizes = [args.nhid]*args.levels
 kernel_size = args.ksize
 dropout = args.dropout
-model = TCN(input_channels, n_classes, channel_sizes, kernel_size=kernel_size, dropout=dropout, no_weight_norm = not args.weight_norm)
+model = TCN(input_channels, n_classes, channel_sizes, kernel_size=kernel_size, dropout=dropout, no_weight_norm = not args.weight_norm, use_fixup_init = args.use_fixup_init)
 
 if args.cuda:
     model.cuda()
