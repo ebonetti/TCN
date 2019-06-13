@@ -62,7 +62,7 @@ class TemporalBlock(nn.Module):
         out = self.chomp1(self.conv1(x + self.bias1a))
         out = self.dropout1(self.relu1(out + self.bias1b))
 
-        out = self.chomp2(self.conv2(x + self.bias2a))
+        out = self.chomp2(self.conv2(out + self.bias2a))
         out = self.dropout2(self.relu2(out + self.bias2b))
 
         out = out * self.scale + self.bias3b
