@@ -21,36 +21,37 @@ class TemporalBlock(nn.Module):
         if no_weight_norm:
             weight_norm = lambda x: x
 
-        self.bias1 = nn.Parameter(torch.zeros(1))
+        self.bias1a = nn.Parameter(torch.zeros(1))
         self.conv1 = weight_norm(nn.Conv1d(n_inputs, n_outputs, kernel_size,
-                                           stride=stride, padding=padding, dilation=dilation))
+                                           stride=stride, padding=padding,
+                                           dilation=dilation, bias=False))
         self.chomp1 = Chomp1d(padding)
+        self.bias1b = nn.Parameter(torch.zeros(1))
         self.relu1 = nn.ReLU()
         self.dropout1 = nn.Dropout(dropout)
-        self.subnet1 = nn.Sequential(self.conv1, self.chomp1, self.relu1, self.dropout1)
 
-        self.bias2 = nn.Parameter(torch.zeros(1))
+        self.bias2a = nn.Parameter(torch.zeros(1))
         self.conv2 = weight_norm(nn.Conv1d(n_outputs, n_outputs, kernel_size,
-                                           stride=stride, padding=padding, dilation=dilation))
+                                           stride=stride, padding=padding,
+                                           dilation=dilation, bias=False))
         self.chomp2 = Chomp1d(padding)
+        self.bias2b = nn.Parameter(torch.zeros(1))
         self.relu2 = nn.ReLU()
         self.dropout2 = nn.Dropout(dropout)
-        self.subnet2 = nn.Sequential(self.conv2, self.chomp2, self.relu2, self.dropout2)
 
 
-        self.downsample = nn.Conv1d(n_inputs, n_outputs, 1) if n_inputs != n_outputs else None
+        self.downsample = nn.Conv1d(n_inputs, n_outputs, 1, bias=False) if n_inputs != n_outputs else None
         self.scale = nn.Parameter(torch.ones(1))
-        self.bias3 = nn.Parameter(torch.zeros(1))
+        self.bias3b = nn.Parameter(torch.zeros(1))
         self.relu = nn.ReLU()
         self.init_weights()
 
     def init_weights(self):
-        print(self.conv1.weight.shape)
         if self.use_fixup_init:
-            self.conv1.weight.data.normal_(0, (2 / (self.conv1.weight.shape[1] * self.conv1.weight.shape[2] * self.num_levels)) ** 0.5)
+            self.conv1.weight.data.normal_(0, (2 / (self.conv1.kernel_size * self.conv1.out_channels * self.num_levels)) ** 0.5)
             self.conv2.weight.data.zero_()
             if self.downsample is not None:
-                self.downsample.weight.data.normal_(0, (2 / (self.downsample.weight.shape[1] * self.downsample.weight.shape[2])) ** 0.5)
+                self.downsample.weight.data.normal_(0, (2 / (self.downsample.kernel_size * self.downsample.out_channels)) ** 0.5)
         else:
             self.conv1.weight.data.normal_(0, 0.01)
             self.conv2.weight.data.normal_(0, 0.01)
@@ -58,9 +59,13 @@ class TemporalBlock(nn.Module):
                 self.downsample.weight.data.normal_(0, 0.01)
 
     def forward(self, x):
-        out = self.subnet1(x + self.bias1)
-        out = self.subnet2(out + self.bias2)
-        out = out * self.scale + self.bias3
+        out = self.chomp1(self.conv1(x + self.bias1a))
+        out = self.dropout1(self.relu1(out + self.bias1b))
+
+        out = self.chomp2(self.conv2(x + self.bias2a))
+        out = self.dropout2(self.relu2(out + self.bias2b))
+
+        out = out * self.scale + self.bias3b
 
         res = x if self.downsample is None else self.downsample(x + self.bias1)
         
