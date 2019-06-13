@@ -12,7 +12,7 @@ class Chomp1d(nn.Module):
 
 
 class TemporalBlock(nn.Module):
-    def __init__(self, n_inputs, n_outputs, kernel_size, stride, dilation, padding, no_weight_norm, use_fixup_init, num_levels, dropout=0.2):
+    def __init__(self, n_inputs, n_outputs, kernel_size, stride, dilation, padding, dropout=0.2, no_weight_norm = False, use_fixup_init = False, num_levels = None):
         super(TemporalBlock, self).__init__()
         self.use_fixup_init = use_fixup_init
         self.num_levels = num_levels
@@ -72,7 +72,7 @@ class TemporalBlock(nn.Module):
         return self.relu(out + res)
 
 class TemporalConvNet(nn.Module):
-    def __init__(self, num_inputs, num_channels, no_weight_norm, use_fixup_init, kernel_size=2, dropout=0.2):
+    def __init__(self, num_inputs, num_channels, kernel_size=2, dropout=0.2, no_weight_norm=False, use_fixup_init=False):
         super(TemporalConvNet, self).__init__()
         layers = []
         num_levels = len(num_channels)
