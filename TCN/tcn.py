@@ -67,7 +67,7 @@ class TemporalBlock(nn.Module):
 
         out = out * self.scale + self.bias3b
 
-        res = x if self.downsample is None else self.downsample(x + self.bias1)
+        res = x if self.downsample is None else self.downsample(x + self.bias1a)
         
         return self.relu(out + res)
 
