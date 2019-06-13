@@ -49,15 +49,13 @@ class TemporalBlock(nn.Module):
             self.downsample.weight.data.normal_(0, 0.01)
 
     def forward(self, x):
-        res = self.subnet1(x + self.bias1)
-        res = self.subnet2(res + self.bias2)
-        res = res * self.scale + self.bias3
+        out = self.subnet1(x + self.bias1)
+        out = self.subnet2(out + self.bias2)
+        out = out * self.scale + self.bias3
 
-        identity = x
-        if self.downsample is not None:
-            identity = self.downsample(x + self.bias1)
-
-        return self.relu(identity+res)
+        res = x if self.downsample is None else self.downsample(x + self.bias1)
+        
+        return self.relu(out + res)
 
 class TemporalConvNet(nn.Module):
     def __init__(self, num_inputs, num_channels, no_weight_norm, kernel_size=2, dropout=0.2):
