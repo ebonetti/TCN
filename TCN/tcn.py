@@ -19,21 +19,26 @@ class TemporalBlock(nn.Module):
         if no_weight_norm:
             weight_norm = lambda x: x
 
+        self.bias1 = nn.Parameter(torch.zeros(1))#################################
         self.conv1 = weight_norm(nn.Conv1d(n_inputs, n_outputs, kernel_size,
                                            stride=stride, padding=padding, dilation=dilation))
         self.chomp1 = Chomp1d(padding)
         self.relu1 = nn.ReLU()
         self.dropout1 = nn.Dropout(dropout)
+        self.subnet1 = nn.Sequential(self.conv1, self.chomp1, self.relu1, self.dropout1)
 
+        self.bias2 = nn.Parameter(torch.zeros(1))#################################
         self.conv2 = weight_norm(nn.Conv1d(n_outputs, n_outputs, kernel_size,
                                            stride=stride, padding=padding, dilation=dilation))
         self.chomp2 = Chomp1d(padding)
         self.relu2 = nn.ReLU()
         self.dropout2 = nn.Dropout(dropout)
+        self.subnet2 = nn.Sequential(self.conv2, self.chomp2, self.relu2, self.dropout2)
 
-        self.net = nn.Sequential(self.conv1, self.chomp1, self.relu1, self.dropout1,
-                                 self.conv2, self.chomp2, self.relu2, self.dropout2)
+
         self.downsample = nn.Conv1d(n_inputs, n_outputs, 1) if n_inputs != n_outputs else None
+        self.scale = nn.Parameter(torch.ones(1))
+        self.bias3 = nn.Parameter(torch.zeros(1))#################################
         self.relu = nn.ReLU()
         self.init_weights()
 
@@ -44,9 +49,17 @@ class TemporalBlock(nn.Module):
             self.downsample.weight.data.normal_(0, 0.01)
 
     def forward(self, x):
-        out = self.net(x)
-        res = x if self.downsample is None else self.downsample(x)
-        return self.relu(out + res)
+        identity = x
+
+        out = self.subnet1(x + self.bias1)
+        out = self.subnet2(out + self.bias2)
+        out = out * self.scale + self.bias3
+
+        if self.downsample is not None:
+            identity = self.downsample(x + self.bias1)
+
+        out += identity
+        out = self.relu(out)
 
 class TemporalConvNet(nn.Module):
     def __init__(self, num_inputs, num_channels, no_weight_norm, kernel_size=2, dropout=0.2):
