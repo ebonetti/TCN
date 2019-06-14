@@ -28,8 +28,6 @@ parser.add_argument('--log-interval', type=int, default=100, metavar='N',
                     help='report interval (default: 100')
 parser.add_argument('--lr', type=float, default=2e-3,
                     help='initial learning rate (default: 2e-3)')
-parser.add_argument('--decay', default=0, type=float,
-                    help='weight decay (default=0)')
 parser.add_argument('--optim', type=str, default='Adam',
                     help='optimizer to use (default: Adam)')
 parser.add_argument('--nhid', type=int, default=25,
@@ -38,8 +36,6 @@ parser.add_argument('--seed', type=int, default=1111,
                     help='random seed (default: 1111)')
 parser.add_argument('--permute', action='store_true',
                     help='use permuted MNIST (default: false)')
-parser.add_argument('--weight_norm', action='store_false',
-                    help='use weight_norm (default: True)')
 parser.add_argument('--use_fixup_init', action='store_true',
                     help='use fixup for initializing weights (default: False)')
 args = parser.parse_args()
@@ -63,14 +59,14 @@ train_loader, test_loader = data_generator(root, batch_size)
 permute = torch.Tensor(np.random.permutation(784).astype(np.float64)).long()
 channel_sizes = [args.nhid] * args.levels
 kernel_size = args.ksize
-model = TCN(input_channels, n_classes, channel_sizes, kernel_size=kernel_size, dropout=args.dropout, no_weight_norm = not args.weight_norm, use_fixup_init = args.use_fixup_init)
+model = TCN(input_channels, n_classes, channel_sizes, kernel_size=kernel_size, dropout=args.dropout, use_fixup_init = args.use_fixup_init)
 
 if args.cuda:
     model.cuda()
     permute = permute.cuda()
 
 lr = args.lr
-optimizer = getattr(optim, args.optim)(model.parameters(), lr=lr, weight_decay=args.decay)
+optimizer = getattr(optim, args.optim)(model.parameters(), lr=lr)
 
 
 def train(ep):

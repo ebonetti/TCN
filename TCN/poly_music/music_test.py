@@ -27,8 +27,6 @@ parser.add_argument('--log-interval', type=int, default=100, metavar='N',
                     help='report interval (default: 100')
 parser.add_argument('--lr', type=float, default=1e-3,
                     help='initial learning rate (default: 1e-3)')
-parser.add_argument('--decay', default=0, type=float,
-                    help='weight decay (default=0)')
 parser.add_argument('--optim', type=str, default='Adam',
                     help='optimizer to use (default: Adam)')
 parser.add_argument('--nhid', type=int, default=150,
@@ -37,8 +35,6 @@ parser.add_argument('--data', type=str, default='Nott',
                     help='the dataset to run (default: Nott)')
 parser.add_argument('--seed', type=int, default=1111,
                     help='random seed (default: 1111)')
-parser.add_argument('--weight_norm', action='store_false',
-                    help='use weight_norm (default: True)')
 parser.add_argument('--use_fixup_init', action='store_true',
                     help='use fixup for initializing weights (default: False)')
 
@@ -58,7 +54,7 @@ n_channels = [args.nhid] * args.levels
 kernel_size = args.ksize
 dropout = args.dropout
 
-model = TCN(input_size, input_size, n_channels, kernel_size, dropout=args.dropout, no_weight_norm = not args.weight_norm, use_fixup_init = args.use_fixup_init)
+model = TCN(input_size, input_size, n_channels, kernel_size, dropout=args.dropout, use_fixup_init = args.use_fixup_init)
 
 
 if args.cuda:
@@ -66,7 +62,7 @@ if args.cuda:
 
 criterion = nn.CrossEntropyLoss()
 lr = args.lr
-optimizer = getattr(optim, args.optim)(model.parameters(), lr=lr, weight_decay=args.decay)
+optimizer = getattr(optim, args.optim)(model.parameters(), lr=lr)
 
 
 def evaluate(X_data, name='Eval'):

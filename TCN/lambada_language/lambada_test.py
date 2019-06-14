@@ -37,8 +37,6 @@ parser.add_argument('--log-interval', type=int, default=100, metavar='N',
                     help='report interval (default: 100)')
 parser.add_argument('--lr', type=float, default=4,
                     help='initial learning rate (default: 4)')
-parser.add_argument('--decay', default=0, type=float,
-                    help='weight decay (default=0)')
 parser.add_argument('--nhid', type=int, default=500,
                     help='number of hidden units per layer (default: 500)')
 parser.add_argument('--seed', type=int, default=1111,
@@ -53,8 +51,6 @@ parser.add_argument('--seq_len', type=int, default=100,
                     help='total sequence length, including effective history (default: 100)')
 parser.add_argument('--corpus', action='store_true',
                     help='force re-make the corpus (default: False)')
-parser.add_argument('--weight_norm', action='store_false',
-                    help='use weight_norm (default: True)')
 parser.add_argument('--use_fixup_init', action='store_true',
                     help='use fixup for initializing weights (default: False)')
 args = parser.parse_args()
@@ -79,14 +75,14 @@ emb_dropout = args.emb_dropout
 tied = args.tied
 
 model = TCN(args.emsize, n_words, num_chans, dropout=dropout, 
-            emb_dropout=emb_dropout, kernel_size=k_size, tied_weights=tied, no_weight_norm = not args.weight_norm, use_fixup_init = args.use_fixup_init)
+            emb_dropout=emb_dropout, kernel_size=k_size, tied_weights=tied, use_fixup_init = args.use_fixup_init)
 
 if args.cuda:
     model.cuda()
 
 criterion = nn.CrossEntropyLoss()
 lr = args.lr
-optimizer = getattr(optim, args.optim)(model.parameters(), lr=lr, weight_decay=args.decay)
+optimizer = getattr(optim, args.optim)(model.parameters(), lr=lr)
 
 
 def evaluate(data_source):

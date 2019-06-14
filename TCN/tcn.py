@@ -1,5 +1,6 @@
 import torch
 import torch.nn as nn
+from torch.nn.utils import weight_norm
 
 
 class Chomp1d(nn.Module):
@@ -12,14 +13,9 @@ class Chomp1d(nn.Module):
 
 
 class TemporalBlock(nn.Module):
-    def __init__(self, n_inputs, n_outputs, kernel_size, stride, dilation, padding, dropout=0.2, no_weight_norm = False, use_fixup_init = False, num_levels = None):
+    def __init__(self, n_inputs, n_outputs, kernel_size, stride, dilation, padding, dropout=0.2, fixup_levels = None):
         super(TemporalBlock, self).__init__()
-        self.use_fixup_init = use_fixup_init
-        self.num_levels = num_levels
-
-        weight_norm = torch.nn.utils.weight_norm
-        if no_weight_norm:
-            weight_norm = lambda x: x
+        self.fixup_levels = fixup_levels
 
         self.bias1a = nn.Parameter(torch.zeros(1))
         self.conv1 = weight_norm(nn.Conv1d(n_inputs, n_outputs, kernel_size,
@@ -47,12 +43,12 @@ class TemporalBlock(nn.Module):
         self.init_weights()
 
     def init_weights(self):
-        if self.use_fixup_init:
-            self.conv1.weight.data.normal_(0, (2.0 / (self.conv1.kernel_size[0] * self.conv1.out_channels * self.num_levels)) ** 0.5)
+        if self.fixup_levels:
+            self.conv1.weight.data.normal_(0, (2.0 / (self.conv1.kernel_size[0] * self.conv1.out_channels * self.fixup_levels)) ** 0.5)
             self.conv2.weight.data.zero_()
             if self.downsample is not None:
                 self.downsample.weight.data.normal_(0, (2.0 / (self.downsample.kernel_size[0] * self.downsample.out_channels)) ** 0.5)
-        else:
+        else:#Fallback to normal init
             self.conv1.weight.data.normal_(0, 0.01)
             self.conv2.weight.data.normal_(0, 0.01)
             if self.downsample is not None:
@@ -71,18 +67,18 @@ class TemporalBlock(nn.Module):
         
         return self.relu(out + res)
 
+
 class TemporalConvNet(nn.Module):
-    def __init__(self, num_inputs, num_channels, kernel_size=2, dropout=0.2, no_weight_norm=False, use_fixup_init=False):
+    def __init__(self, num_inputs, num_channels, kernel_size=2, dropout=0.2, use_fixup_init=False):
         super(TemporalConvNet, self).__init__()
         layers = []
-        num_levels = len(num_channels)
-        for i in range(num_levels):
+        fixup_levels = len(num_channels) if use_fixup_init else None
+        for i in range(fixup_levels):
             dilation_size = 2 ** i
             in_channels = num_inputs if i == 0 else num_channels[i-1]
             out_channels = num_channels[i]
             layers += [TemporalBlock(in_channels, out_channels, kernel_size, stride=1, dilation=dilation_size,
-                                     padding=(kernel_size-1) * dilation_size, dropout=dropout,
-                                     no_weight_norm=no_weight_norm, use_fixup_init=use_fixup_init, num_levels=num_levels)]
+                                     padding=(kernel_size-1) * dilation_size, dropout=dropout, fixup_levels=fixup_levels)]
 
         self.network = nn.Sequential(*layers)
 
