@@ -117,9 +117,10 @@ def test():
             correct += pred.eq(target.data.view_as(pred)).cpu().sum()
 
         test_loss /= len(test_loader.dataset)
-        print('\nTest set: Average loss: {:.4f}, Accuracy: {}/{} ({:.0f}%)\n'.format(
-            test_loss, correct, len(test_loader.dataset),
-            100. * correct / len(test_loader.dataset)))
+        # print('\nTest set: Average loss: {:.4f}, Accuracy: {}/{} ({:.0f}%)\n'.format(
+        #     test_loss, correct, len(test_loader.dataset),
+        #     100. * correct / len(test_loader.dataset)))
+        print('\nTest set: Average loss: {:.8f}\n'.format(test_loss))
         return test_loss
 
 

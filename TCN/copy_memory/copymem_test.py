@@ -97,8 +97,9 @@ def evaluate():
         pred = out.view(-1, n_classes).data.max(1, keepdim=True)[1]
         correct = pred.eq(test_y.data.view_as(pred)).cpu().sum()
         counter = out.view(-1, n_classes).size(0)
-        print('\nTest set: Average loss: {:.8f}  |  Accuracy: {:.4f}\n'.format(
-            loss.item(), 100. * correct / counter))
+        # print('\nTest set: Average loss: {:.8f}  |  Accuracy: {:.4f}\n'.format(
+        #     loss.item(), 100. * correct / counter))
+        print('\nTest set: Average loss: {:.8f}\n'.format(loss.item()))
         return loss.item()
 
 

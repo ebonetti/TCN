@@ -161,6 +161,7 @@ if __name__ == "__main__":
                   'test ppl {:8.2f}'.format(epoch, (time.time() - epoch_start_time),
                                             test_loss, math.exp(test_loss)))
             print('-' * 89)
+            print('\nTest set: Average loss: {:.8f}\n'.format(test_loss))
             # Save the model if the validation loss is the best we've seen so far.
 
             if val_loss < best_vloss:

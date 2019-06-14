@@ -87,6 +87,7 @@ def evaluate(X_data, name='Eval'):
             count += output.size(0)
         eval_loss = total_loss / count
         print(name + " loss: {:.5f}".format(eval_loss))
+        print('\nTest set: Average loss: {:.8f}\n'.format(eval_loss))
         return eval_loss
 
 

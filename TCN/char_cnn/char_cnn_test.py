@@ -111,7 +111,7 @@ def evaluate(source):
         val_loss = total_loss.item() / count * 1.0
         return val_loss
 
-
+        
 def train(epoch):
     model.train()
     total_loss = 0
@@ -169,6 +169,7 @@ def main():
             print('| End of epoch {:3d} | test loss {:5.3f} | test bpc {:8.3f}'.format(
                 epoch, test_loss, test_loss / math.log(2)))
             print('=' * 89)
+            print('\nTest set: Average loss: {:.6f}\n'.format(test_loss.item()))
 
             if epoch > 5 and vloss > max(all_losses[-3:]):
                 lr = lr / 10.
