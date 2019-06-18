@@ -17,28 +17,26 @@ class TemporalBlock(nn.Module):
         super(TemporalBlock, self).__init__()
         self.fixup_levels = fixup_levels
 
-        self.bias1a = nn.Parameter(torch.zeros(1))
+        self.bias1 = nn.Parameter(torch.zeros(1))
         self.conv1 = weight_norm(nn.Conv1d(n_inputs, n_outputs, kernel_size,
-                                           stride=stride, padding=padding,
-                                           dilation=dilation, bias=False))
+                                           stride=stride, padding=padding, dilation=dilation))
         self.chomp1 = Chomp1d(padding)
-        self.bias1b = nn.Parameter(torch.zeros(1))
         self.relu1 = nn.ReLU()
         self.dropout1 = nn.Dropout(dropout)
+        self.subnet1 = nn.Sequential(self.conv1, self.chomp1, self.relu1, self.dropout1)
 
-        self.bias2a = nn.Parameter(torch.zeros(1))
+        self.bias2 = nn.Parameter(torch.zeros(1))
         self.conv2 = weight_norm(nn.Conv1d(n_outputs, n_outputs, kernel_size,
-                                           stride=stride, padding=padding,
-                                           dilation=dilation, bias=False))
+                                           stride=stride, padding=padding, dilation=dilation))
         self.chomp2 = Chomp1d(padding)
-        self.bias2b = nn.Parameter(torch.zeros(1))
         self.relu2 = nn.ReLU()
         self.dropout2 = nn.Dropout(dropout)
+        self.subnet2 = nn.Sequential(self.conv2, self.chomp2, self.relu2, self.dropout2)
 
 
-        self.downsample = nn.Conv1d(n_inputs, n_outputs, 1, bias=False) if n_inputs != n_outputs else None
+        self.downsample = weight_norm(nn.Conv1d(n_inputs, n_outputs, 1)) if n_inputs != n_outputs else None
         self.scale = nn.Parameter(torch.ones(1))
-        self.bias3b = nn.Parameter(torch.zeros(1))
+        self.bias3 = nn.Parameter(torch.zeros(1))
         self.relu = nn.ReLU()
         self.init_weights()
 
@@ -55,21 +53,17 @@ class TemporalBlock(nn.Module):
                 self.downsample.weight.data.normal_(0, 0.01)
 
     def forward(self, x):
-        out = self.chomp1(self.conv1(x + self.bias1a))
-        out = self.dropout1(self.relu1(out + self.bias1b))
+        out = self.subnet1(x + self.bias1)
+        out = self.subnet2(out + self.bias2)
+        out = out * self.scale + self.bias3
 
-        out = self.chomp2(self.conv2(out + self.bias2a))
-        out = self.dropout2(self.relu2(out + self.bias2b))
-
-        out = out * self.scale + self.bias3b
-
-        res = x if self.downsample is None else self.downsample(x + self.bias1a)
+        res = x if self.downsample is None else self.downsample(x + self.bias1)
         
         return self.relu(out + res)
 
 
 class TemporalConvNet(nn.Module):
-    def __init__(self, num_inputs, num_channels, kernel_size=2, dropout=0.2, use_fixup_init=False):
+    def __init__(self, num_inputs, num_channels, kernel_size=2, dropout=0.2, use_fixup_init=True):
         super(TemporalConvNet, self).__init__()
         layers = []
         num_levels = len(num_channels)
